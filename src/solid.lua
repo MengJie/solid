@@ -17,7 +17,7 @@ function keystr(key)
 	end
 end
 
-function repr(tbl, level, key)
+function repr(tbl, key, level)
 	level = level or 0
 	key = key or ""
 	local ret = {}
@@ -28,7 +28,7 @@ function repr(tbl, level, key)
 	end
 	for k, v in clsStorage:StoragePairs(tbl) do
 		if type(v) == 'table' then
-			table.insert(ret, repr(v, level + 1, k))
+			table.insert(ret, repr(v, k, level + 1))
 		elseif type(v) == 'number' then
 			table.insert(ret, string.format("%s%s = %s,",
 				indent(level+1), keystr(k), tostring(v)))
@@ -51,6 +51,7 @@ clsStorage.__index = clsStorage
 
 function clsStorage:New()
 	local obj = {
+		ref = {},
 		storage = {},
 	}
 	setmetatable(obj, self)
@@ -280,7 +281,88 @@ function clsStorage:Diff(id1, id2)
 	return ret
 end
 
+function clsStorage:NewTip(name)
+	self.ref[name] = "0"
+	return self:GetTip(name)
+end
+
+function clsStorage:GetTip(name)
+	return self.ref[name]
+end
+
+function clsStorage:UpdateTip(name, old, new)
+	if old ~= self.ref[name] then
+		return false, 'need update'
+	end
+	self.ref[name] = new
+	return new
+end
+
+function clsStorage:Lock(tip)
+end
+function clsStorage:Unlock(tip)
+end
+
+clsRepos = {}
+clsRepos.__index = clsRepos
+
+function clsRepos:New(tipname, store)
+	local obj = {}
+	setmetatable(obj, self)
+	obj.store = store
+	obj.tipname = tipname
+	obj.tip = store:GetTip(tipname)
+	if obj.tip == nil then
+		obj.tip = store:NewTip(tipname)
+	end
+	return obj
+end
+
+function clsRepos:Commit(value, message)
+	local id = self.store:Save(value)
+	local commit = {
+		__data = {"parents", "time", "ref", "message"},
+		parents = {
+			__data = 'list',
+			self.tip,
+		},
+		ref = id,
+		message = message,
+		time = os.time(),
+	}
+	local ntip = self.store:Save(commit)
+	local isok, msg = self.store:UpdateTip(self.tipname, self.tip, ntip)
+	if not isok then
+		error(msg)
+	end
+	self.tip = ntip
+	return self.tip
+end
+
+function clsRepos:Log(count)
+	local tipqueue = {self.tip}
+	while #tipqueue > 0 do
+		local tip = table.remove(tipqueue, 1)
+		if tip == "0" then return end
+		local commit = self.store:Load(tip)
+		for i, v in ipairs(commit.parents) do
+			table.insert(tipqueue, v)
+		end
+		print("commit: "..commit.__id)
+		for i, v in ipairs(commit.parents) do
+			print("parent: "..v)
+		end
+		print("ref:    "..commit.ref)
+		print("user:   "..self.tipname)
+		print("date:   "..os.date("%D %T", commit.time))
+		print("")
+		print(commit.message)
+		print("")
+	end
+end
+
 local store = clsStorage:New()
+local repos = clsRepos:New("inmouse@gmail.com", store)
 
 local user1 = {
 	__data = {'age', 'name', 'married', 'items' },
@@ -299,6 +381,8 @@ local user1 = {
 		},
 	},
 }
+repos:Commit(user1, "first version")
+
 local user2 = {
 	__data = {'age', 'name', 'married', 'items' },
 	age = 13,
@@ -316,6 +400,8 @@ local user2 = {
 		},
 	},
 }
+repos:Commit(user2, "second version")
+
 local user3 = {
 	__data = {'age', 'name', 'married', 'items' },
 	age = 13,
@@ -323,27 +409,35 @@ local user3 = {
 	married = false,
 	items = "name",
 }
-local id1 = store:Save(user1)
-local id2 = store:Save(user2)
-local id3 = store:Save(user3)
+repos:Commit(user3, "third version")
 
-local count = 0
-for k, v in pairs(store.storage) do
-	count = count + #k + #v
-	--print(k)
-	--print('--------')
-	--print(v)
-	--print('--------')
-end
-print('save used: '..count)
+repos:Log(5)
 
-print('load ..........')
 
-local luser1 = store:Load(id1)
-print(repr(luser1))
-
-local luser2 = store:Load(id2)
-print(repr(luser2))
-
-local ret = store:Diff(id1, id3)
-print(repr(ret))
+--local id1 = store:Save(user1)
+--local id2 = store:Save(user2)
+--local id3 = store:Save(user3)
+--
+--local count = 0
+--for k, v in pairs(store.storage) do
+--	count = count + #k + #v
+--	--print(k)
+--	--print('--------')
+--	--print(v)
+--	--print('--------')
+--end
+--print('save used: '..count)
+--
+--print('load ..........')
+--
+--local luser1 = store:Load(id1)
+--print(repr(luser1, 'user1'))
+--
+--local luser2 = store:Load(id2)
+--print(repr(luser2, 'user2'))
+--
+--local luser3 = store:Load(id3)
+--print(repr(luser3, 'user3'))
+--
+--local ret = store:Diff(id1, id3)
+--print(repr(ret))
