@@ -361,6 +361,13 @@ function clsRepos:Log(count)
 	end
 end
 
+function clsRepos:CheckOut(commitid)
+	commitid = commitid or self.tip
+	local commit = self.store:Load(commitid)
+	local value = self.store:Load(commit.ref)
+	return value
+end
+
 local store = clsStorage:New()
 local repos = clsRepos:New("inmouse@gmail.com", store)
 
@@ -381,7 +388,7 @@ local user1 = {
 		},
 	},
 }
-repos:Commit(user1, "first version")
+v1 = repos:Commit(user1, "first version")
 
 local user2 = {
 	__data = {'age', 'name', 'married', 'items' },
@@ -400,7 +407,7 @@ local user2 = {
 		},
 	},
 }
-repos:Commit(user2, "second version")
+v2 = repos:Commit(user2, "second version")
 
 local user3 = {
 	__data = {'age', 'name', 'married', 'items' },
@@ -409,24 +416,28 @@ local user3 = {
 	married = false,
 	items = "name",
 }
-repos:Commit(user3, "third version")
+v3 = repos:Commit(user3, "third version")
 
 repos:Log(5)
 
+print(repr(repos:CheckOut(v1), "v1"))
+print(repr(repos:CheckOut(v2), "v2"))
+print(repr(repos:CheckOut(v3), "v3"))
 
+--print(repr(store.storage))
 --local id1 = store:Save(user1)
 --local id2 = store:Save(user2)
 --local id3 = store:Save(user3)
 --
---local count = 0
---for k, v in pairs(store.storage) do
---	count = count + #k + #v
---	--print(k)
---	--print('--------')
---	--print(v)
---	--print('--------')
---end
---print('save used: '..count)
+local count = 0
+for k, v in pairs(store.storage) do
+	count = count + #k + #v
+	--print(k)
+	--print('--------')
+	--print(v)
+	--print('--------')
+end
+print('save used: '..count)
 --
 --print('load ..........')
 --
