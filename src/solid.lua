@@ -224,6 +224,7 @@ function clsStorage:DiffDelete(val, path, ret)
 		for k, v in self:StoragePairs(val) do
 			self:DiffDelete(val[k], self:IncPath(path,k), ret)
 		end
+		table.insert(ret.delete, {path})
 	else
 		table.insert(ret.delete, {path, val})
 	end
@@ -233,6 +234,7 @@ function clsStorage:DiffNew(val, path, ret)
 	assert(path)
 	assert(ret)
 	if type(val) == 'table' then
+		table.insert(ret.new, {path})
 		for k, v in self:StoragePairs(val) do
 			self:DiffNew(val[k], self:IncPath(path,k), ret)
 		end
