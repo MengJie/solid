@@ -368,6 +368,19 @@ function clsRepos:CheckOut(commitid)
 	return value
 end
 
+function clsRepos:Diff(base, cur)
+	local basev = self:CheckOut(base)
+	local curv = self:CheckOut(curv)
+	local path = ""
+	local ret = {
+		new = {},
+		delete = {},
+		change = {},
+	}
+	self.store:DiffValue(basev, curv, path, ret)
+	return ret
+end
+
 local store = clsStorage:New()
 local repos = clsRepos:New("inmouse@gmail.com", store)
 
@@ -423,6 +436,8 @@ repos:Log(5)
 print(repr(repos:CheckOut(v1), "v1"))
 print(repr(repos:CheckOut(v2), "v2"))
 print(repr(repos:CheckOut(v3), "v3"))
+
+print(repr(repos:Diff(v1, v3)))
 
 --print(repr(store.storage))
 --local id1 = store:Save(user1)
