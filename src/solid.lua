@@ -390,7 +390,7 @@ end
 local store = clsStorage:New()
 local repos = clsRepos:New("inmouse@gmail.com", store)
 
-local user1 = {
+local user = {
 	__data = {'age', 'name', 'married', 'items' },
 	age = 13,
 	name = "fff",
@@ -407,43 +407,29 @@ local user1 = {
 		},
 	},
 }
-v1 = repos:Commit(user1, "first version")
+v1 = repos:Commit(user, "create user.")
 
-local user2 = {
-	__data = {'age', 'name', 'married', 'items' },
-	age = 13,
-	name = "sss",
-	married = false,
-	items = {
-		__data = 'list',
-		[1] = {
-			__data = {'name'},
-			name = "sword",
-		},
-		[2] = {
-			__data = {'name'},
-			name = "armor",
-		},
-	},
-}
-v2 = repos:Commit(user2, "second version")
+user.name = 'sss'
+v2 = repos:Commit(user, "change name.")
 
-local user3 = {
-	__data = {'age', 'name', 'married', 'items' },
-	age = 13,
-	name = "sss",
-	married = false,
-	items = "name",
-}
-v3 = repos:Commit(user3, "third version")
+user.items[1].name = 'sword'
+v3 = repos:Commit(user, "change item name.")
+
+user.items = "name"
+v4 = repos:Commit(user, "error operation.")
+
+user.items = { __data = 'list' }
+v5 = repos:Commit(user, "recover item package.")
 
 repos:Log(5)
 
 print(repr(repos:CheckOut(v1), "v1"))
 print(repr(repos:CheckOut(v2), "v2"))
 print(repr(repos:CheckOut(v3), "v3"))
+print(repr(repos:CheckOut(v4), "v4"))
+print(repr(repos:CheckOut(v5), "v5"))
 
-print(repr(repos:Diff(v1, v3)))
+print(repr(repos:Diff(v4, v2)))
 
 --print(repr(store.storage))
 --local id1 = store:Save(user1)
@@ -458,7 +444,7 @@ for k, v in pairs(store.storage) do
 	--print(v)
 	--print('--------')
 end
-print('save used: '..count)
+print('save used: '..count .. ' bytes')
 --
 --print('load ..........')
 --
