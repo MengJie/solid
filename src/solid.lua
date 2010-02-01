@@ -17,6 +17,10 @@ function keystr(key)
 	end
 end
 
+function calchash(value)
+	return hash.repr(hash.md5(value))
+end
+
 function repr(tbl, key, level)
 	level = level or 0
 	key = key or ""
@@ -90,7 +94,7 @@ function clsStorage:SaveTable(value)
 		end
 	end
 	local value = table.concat(content, "\n")
-	local id = hash.repr(hash.md5(value))
+	local id = calchash(value)
 	self.storage[id] = value
 	return id
 end
@@ -112,7 +116,7 @@ function clsStorage:SaveList(value)
 		end
 	end
 	local value = table.concat(content, "\n")
-	local id = hash.repr(hash.md5(value))
+	local id = calchash(value)
 	self.storage[id] = value
 	return id
 end
@@ -123,7 +127,7 @@ function clsStorage:SaveString(value)
 		value,
 	}
 	local value = table.concat(content, "\n")
-	local id = hash.repr(hash.md5(value))
+	local id = calchash(value)
 	self.storage[id] = value
 	return id
 end
