@@ -248,8 +248,7 @@ function clsStorage:DiffValue(base, val, path, ret)
 	assert(ret)
 	if val == nil then
 		self:DiffDelete(base, path, ret)
-	end
-	if type(base) == type(val) then
+	elseif type(base) == type(val) then
 		if type(base) == 'table' then
 			if base.__id == val.__id then return end
 			for k, v in self:StoragePairs(base) do
@@ -377,7 +376,7 @@ end
 
 function clsRepos:Diff(base, cur)
 	local basev = self:CheckOut(base)
-	local curv = self:CheckOut(curv)
+	local curv = self:CheckOut(cur)
 	local path = ""
 	local ret = {
 		new = {},
