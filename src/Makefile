@@ -1,7 +1,10 @@
 
-INC=-I../include
+INC=-I../include \
+	-I/usr/local/include \
+	-I/usr/local/include/lua51
 
-LIBPATH=-L/usr/lib
+LIBPATH=-L/usr/lib \
+		-L/usr/local/lib
 
 HASH_LIB=-lmhash -lstdc++
 HASH_OBJ=hash.o
