@@ -132,6 +132,34 @@ function clsStorage:SaveString(value)
 	return id
 end
 
+--	local commit = {
+--		parents = {
+--			self.tip,
+--		},
+--		ref = id,
+--		message = message,
+--		time = time,
+--	}
+function clsStorage:SaveCommit(value)
+	local msgid = self:SaveString(value.message)
+	local insert = table.insert
+	local format = string.format
+	local commit = {
+		"commit",
+	}
+	for i, v in ipairs(value.parents) do
+		insert(commit, format("p:%s",v))
+	end
+	insert(commit, format("r:%s", value.ref))
+	insert(commit, format("t:%s", tostring(os.time())))
+	insert(commit, format("m:%s", msgid))
+
+	local str = table.concat(commit, "\n")
+	local id = calchash(str)
+	self.storage[id] = str
+	return id
+end
+
 function clsStorage:Load(id)
 	local content = self.storage[id]
 	local sep = string.find(content, "\n")
@@ -148,6 +176,8 @@ function clsStorage:Load(id)
 		return self:LoadTable(id, body)
 	elseif head == "list" then
 		return self:LoadList(id, body)
+	elseif head == "commit" then
+		return self:LoadCommit(id, body)
 	else
 		error("unknow head: "..head)
 	end
@@ -196,6 +226,35 @@ function clsStorage:LoadList(id, body)
 	end
 	ret.__data = 'list'
 	ret.__id = id
+	return ret
+end
+
+--	local commit = {
+--		parents = {
+--			self.tip,
+--		},
+--		ref = id,
+--		message = message,
+--		time = time,
+--	}
+function clsStorage:LoadCommit(id, body)
+	local ret = {
+		parents = {}
+	}
+	for line in body:gmatch("([^\n]+)\n?") do
+		local t,v = line:match("(%a):(%w+)")
+		if t == "p" then
+			table.insert(ret.parents, v)
+		elseif t == "r" then
+			ret.ref = v
+		elseif t == "t" then
+			ret.time = tonumber(v)
+		elseif t == "m" then
+			ret.message = self:Load(v)
+		else
+			error("unknow type of commit " .. t)
+		end
+	end
 	return ret
 end
 
@@ -331,16 +390,14 @@ end
 function clsRepos:Commit(value, message)
 	local id = self.store:Save(value)
 	local commit = {
-		__data = {"parents", "time", "ref", "message"},
 		parents = {
-			__data = 'list',
 			self.tip,
 		},
 		ref = id,
 		message = message,
 		time = os.time(),
 	}
-	local ntip = self.store:Save(commit)
+	local ntip = self.store:SaveCommit(commit)
 	local isok, msg = self.store:UpdateTip(self.tipname, self.tip, ntip)
 	if not isok then
 		error(msg)
@@ -358,7 +415,7 @@ function clsRepos:Log(count)
 		for i, v in ipairs(commit.parents) do
 			table.insert(tipqueue, v)
 		end
-		print("commit: "..commit.__id)
+		print("commit: "..tip)
 		for i, v in ipairs(commit.parents) do
 			print("parent: "..v)
 		end
@@ -426,7 +483,6 @@ user.items = { __data = 'list' }
 v5 = repos:Commit(user, "recover item package.")
 
 repos:Log(5)
-
 print(repr(repos:CheckOut(v1), "v1"))
 print(repr(repos:CheckOut(v2), "v2"))
 print(repr(repos:CheckOut(v3), "v3"))
