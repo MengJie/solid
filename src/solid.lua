@@ -131,8 +131,13 @@ end
 function clsStorage:Load(id)
 	local content = self.storage[id]
 	local sep = string.find(content, "\n")
-	local head = string.sub(content, 1, sep-1)
-	local body = string.sub(content, sep+1)
+	local head, body
+	if sep then
+		head = string.sub(content, 1, sep-1)
+		body = string.sub(content, sep+1)
+	else
+		head, body = content, ""
+	end
 	if head == "string" then
 		return body
 	elseif head == "table" then
