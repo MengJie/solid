@@ -31,9 +31,7 @@ static int hash_md5(lua_State * L)
 	if (td == MHASH_FAILED)
 		return luaL_error(L, "init MHASH for md5 failed.");
 
-	//for (int i = 0; i < buflen; ++i) {
-		mhash(td, buffer, buflen);
-	//}
+	mhash(td, buffer, buflen);
 
 	char hash[16]; /* only for md5 */
 	mhash_deinit(td, hash);
@@ -45,7 +43,21 @@ static int hash_md5(lua_State * L)
 
 static int hash_sha1(lua_State * L)
 {
-	return 0;
+	size_t buflen;
+	const char * buffer = luaL_checklstring(L, 1, &buflen);
+
+	MHASH td = mhash_init(MHASH_SHA1);
+	if (td == MHASH_FAILED)
+		return luaL_error(L, "init MHASH for md5 failed.");
+
+	mhash(td, buffer, buflen);
+
+	char hash[20]; /* only for md5 */
+	mhash_deinit(td, hash);
+
+	lua_pushlstring(L, hash, 20);
+
+	return 1;
 }
 
 static const luaL_Reg hashlib[] = {
