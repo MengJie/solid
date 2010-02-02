@@ -137,11 +137,13 @@ end
 --			self.tip,
 --		},
 --		ref = id,
+--		user = username,
 --		message = message,
 --		time = time,
 --	}
 function clsStorage:SaveCommit(value)
 	local msgid = self:SaveString(value.message)
+	local userid = self:SaveString(value.user)
 	local insert = table.insert
 	local format = string.format
 	local commit = {
@@ -152,6 +154,7 @@ function clsStorage:SaveCommit(value)
 	end
 	insert(commit, format("r:%s", value.ref))
 	insert(commit, format("t:%s", tostring(os.time())))
+	insert(commit, format("u:%s", userid))
 	insert(commit, format("m:%s", msgid))
 
 	local str = table.concat(commit, "\n")
@@ -251,6 +254,8 @@ function clsStorage:LoadCommit(id, body)
 			ret.time = tonumber(v)
 		elseif t == "m" then
 			ret.message = self:Load(v)
+		elseif t == "u" then
+			ret.user = self:Load(v)
 		else
 			error("unknow type of commit " .. t)
 		end
@@ -394,8 +399,9 @@ function clsRepos:Commit(value, message)
 			self.tip,
 		},
 		ref = id,
-		message = message,
 		time = os.time(),
+		user = self.tipname,
+		message = message,
 	}
 	local ntip = self.store:SaveCommit(commit)
 	local isok, msg = self.store:UpdateTip(self.tipname, self.tip, ntip)
