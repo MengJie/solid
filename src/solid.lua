@@ -412,25 +412,30 @@ function clsRepos:Commit(value, message)
 	return self.tip
 end
 
+function clsRepos:ShowCommit(commit, id)
+	print("commit: "..id)
+	for i, v in ipairs(commit.parents) do
+		print("parent: "..v)
+	end
+	print("ref:    "..commit.ref)
+	print("user:   "..commit.user)
+	print("date:   "..os.date("%D %T", commit.time))
+	print("")
+	print(commit.message)
+	print("")
+end
+
 function clsRepos:Log(count)
 	local tipqueue = {self.tip}
-	while #tipqueue > 0 do
+	while #tipqueue > 0 and count > 0 do
 		local tip = table.remove(tipqueue, 1)
 		if tip == "0" then return end
 		local commit = self.store:Load(tip)
 		for i, v in ipairs(commit.parents) do
 			table.insert(tipqueue, v)
 		end
-		print("commit: "..tip)
-		for i, v in ipairs(commit.parents) do
-			print("parent: "..v)
-		end
-		print("ref:    "..commit.ref)
-		print("user:   "..self.tipname)
-		print("date:   "..os.date("%D %T", commit.time))
-		print("")
-		print(commit.message)
-		print("")
+		self:ShowCommit(commit, tip)
+		count = count - 1
 	end
 end
 
