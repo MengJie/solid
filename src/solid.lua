@@ -174,13 +174,13 @@ function clsStorage:Load(id)
 		head, body = content, ""
 	end
 	if head == "string" then
-		return body
+		return body, head
 	elseif head == "table" then
-		return self:LoadTable(id, body)
+		return self:LoadTable(id, body), head
 	elseif head == "list" then
-		return self:LoadList(id, body)
+		return self:LoadList(id, body), head
 	elseif head == "commit" then
-		return self:LoadCommit(id, body)
+		return self:LoadCommit(id, body), head
 	else
 		error("unknow head: "..head)
 	end
@@ -459,6 +459,20 @@ function clsRepos:Diff(base, cur)
 	return ret
 end
 
+function clsRepos:Show(id)
+	local val, tp = self.store:Load(id)
+	if tp == 'string' then
+		print(val)
+	elseif tp == 'table' then
+		print(repr(val))
+	elseif tp == 'list' then
+		print(repr(val))
+	elseif tp == 'commit' then
+		self:ShowCommit(val, id)
+		-- TODO: add diff
+	end
+end
+
 local store = clsStorage:New()
 local repos = clsRepos:New("inmouse@gmail.com", store)
 
@@ -500,7 +514,7 @@ print(repr(repos:CheckOut(v3), "v3"))
 print(repr(repos:CheckOut(v4), "v4"))
 print(repr(repos:CheckOut(v5), "v5"))
 
-print(repr(repos:Diff(v4, v2)))
+print(repr(repos:Diff(v2, v3)))
 
 --print(repr(store.storage))
 --local id1 = store:Save(user1)
