@@ -87,7 +87,7 @@ function clsStorage:SaveTable(value)
 		elseif type(v) == "number" then
 			table.insert(content, string.format("n:%s=%s", k, tostring(v)))
 		elseif type(v) == "boolean" then
-			table.insert(content, string.format("b:%s=%s", k, tostring(v)))
+			table.insert(content, string.format("b:%s=%s", k, v and 't' or 'f'))
 		elseif type(v) == "string" then
 			local id = self:SaveString(v)
 			table.insert(content, string.format("s:%s=%s", k, id))
@@ -109,7 +109,7 @@ function clsStorage:SaveList(value)
 		elseif type(v) == "number" then
 			table.insert(content, string.format("n:%s", tostring(v)))
 		elseif type(v) == "boolean" then
-			table.insert(content, string.format("b:%s", tostring(v)))
+			table.insert(content, string.format("b:%s", v and 't' or 'f'))
 		elseif type(v) == "string" then
 			local id = self:SaveString(v)
 			table.insert(content, string.format("s:%s", id))
@@ -198,7 +198,7 @@ function clsStorage:LoadTable(id, body)
 		elseif t == "n" then
 			ret[k] = tonumber(v)
 		elseif t == "b" then
-			ret[k] = (v == "true")
+			ret[k] = (v == "t")
 		else
 			error("unknow type " .. t)
 		end
@@ -221,7 +221,7 @@ function clsStorage:LoadList(id, body)
 		elseif t == "n" then
 			ret[idx] = tonumber(v)
 		elseif t == "b" then
-			ret[idx] = (v == "true")
+			ret[idx] = (v == "t")
 		else
 			error("unknow type " .. t)
 		end
