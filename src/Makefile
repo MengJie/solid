@@ -7,7 +7,7 @@ LIBPATH=-L/usr/lib \
 		-L/usr/local/lib
 
 .PHONY: all
-all: hash.so uuid.so
+all: hash.so uuid.so tokyotyrant.so
 
 HASH_LIB=-lmhash -lstdc++
 HASH_OBJ=hash.o
@@ -18,6 +18,11 @@ UUID_LIB=-luuid
 UUID_OBJ=luuid.o
 uuid.so: $(UUID_OBJ)
 	$(CC) -g -shared $(LIBPATH) $(UUID_OBJ) $(UUID_LIB) -o $@
+
+TYRANT_LIB=-ltokyotyrant
+TYRANT_OBJ=ltyrant.o
+tokyotyrant.so: $(TYRANT_OBJ)
+	$(CC) -g -shared $(LIBPATH) $(TYRANT_OBJ) $(TYRANT_LIB) -o $@
 
 .cpp.o:
 	$(CC) -g -c $(INC) $< -o $@

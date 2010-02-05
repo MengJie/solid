@@ -9,7 +9,7 @@ local times = 1
 for j = 1, times do
 	local mem = {}
 	local p
-	for i = 1, 10000000 do
+	for i = 1, 10 do
 		--local ret = math.random(tonumber(arg[1]))
 		local ret = uuid.new()
 		--print(ret)
@@ -27,4 +27,9 @@ end
 
 print('average is '..sum/times)
 print('min is '..min)
+
+id = uuid.new('t')
+print(id)
+
+print(uuid.time(id))
 

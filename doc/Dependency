@@ -4,4 +4,4 @@ The solid project depend the library listed below:
 
 Including:
 	luuid.c					Luiz Henrique de Figueiredo <lhf@tecgraf.puc-rio.br>
-
+	ltyrant.c				Phoenix Sol	
