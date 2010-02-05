@@ -1,6 +1,7 @@
 require 'tip'
 
-local store = clsStorage:New()
+local db = clsTableDB:New()
+local store = clsStorage:New(db)
 local repos = clsTip:New("inmouse@gmail.com", store)
 
 local user = {
@@ -49,7 +50,7 @@ print(repr(repos:Diff(v2, v3)))
 --local id3 = store:Save(user3)
 --
 local count = 0
-for k, v in pairs(store.storage) do
+for k, v in pairs(db.store) do
 	count = count + #k + #v
 	--print(k)
 	--print('--------')

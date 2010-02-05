@@ -1,14 +1,13 @@
 require 'common'
+require 'tabledb'
 
 clsStorage = {}
 clsStorage.__index = clsStorage
 
-function clsStorage:New()
-	local obj = {
-		ref = {},
-		storage = {},
-	}
+function clsStorage:New(db)
+	local obj = { }
 	setmetatable(obj, self)
+	obj.db = db
 	return obj
 end
 
@@ -45,7 +44,7 @@ function clsStorage:SaveTable(value)
 	end
 	local value = table.concat(content, "\n")
 	local id = calchash(value)
-	self.storage[id] = value
+	self.db:Put(id, value)
 	return id
 end
 
@@ -67,7 +66,7 @@ function clsStorage:SaveList(value)
 	end
 	local value = table.concat(content, "\n")
 	local id = calchash(value)
-	self.storage[id] = value
+	self.db:Put(id, value)
 	return id
 end
 
@@ -78,7 +77,7 @@ function clsStorage:SaveString(value)
 	}
 	local value = table.concat(content, "\n")
 	local id = calchash(value)
-	self.storage[id] = value
+	self.db:Put(id, value)
 	return id
 end
 
@@ -109,12 +108,12 @@ function clsStorage:SaveCommit(value)
 
 	local str = table.concat(commit, "\n")
 	local id = calchash(str)
-	self.storage[id] = str
+	self.db:Put(id, str)
 	return id
 end
 
 function clsStorage:Load(id)
-	local content = self.storage[id]
+	local content = self.db:Get(id)
 	local sep = string.find(content, "\n")
 	local head, body
 	if sep then
@@ -306,19 +305,19 @@ function clsStorage:Diff(id1, id2)
 end
 
 function clsStorage:NewTip(name)
-	self.ref[name] = "0"
+	self.db:Put(name, "0")
 	return self:GetTip(name)
 end
 
 function clsStorage:GetTip(name)
-	return self.ref[name]
+	return self.db:Get(name)
 end
 
 function clsStorage:UpdateTip(name, old, new)
-	if old ~= self.ref[name] then
+	if old ~= self.db:Get(name) then
 		return false, 'need update'
 	end
-	self.ref[name] = new
+	self.db:Put(name, new)
 	return new
 end
 
