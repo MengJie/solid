@@ -1,2 +1,7 @@
 The solid project depend the library listed below:
 	mhash
+	e2fsprogs-libuuid
+
+Including:
+	luuid.c					Luiz Henrique de Figueiredo <lhf@tecgraf.puc-rio.br>
+
