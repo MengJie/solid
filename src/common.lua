@@ -60,7 +60,7 @@ function repr(tbl, keyfun, funkey)
 		key, fun = fun, key
 	end
 	fun = fun or pairs
-	return _repr(tbl, "", 0, fun)
+	return _repr(tbl, key, 0, fun)
 end
 
 function calchash(value)
