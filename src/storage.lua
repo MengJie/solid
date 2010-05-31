@@ -33,14 +33,15 @@ function clsStorage:SaveTable(value)
 	table.insert(content, "table")
 	for i, k in ipairs(value.__data) do
 		local v = value[k]
-		if type(v) == "table" then
+		local Type = type(v)
+		if Type == "table" then
 			local id = self:SaveTable(v)
 			table.insert(content, string.format("t:%s=%s", k, id))
-		elseif type(v) == "number" then
+		elseif Type == "number" then
 			table.insert(content, string.format("n:%s=%s", k, v))
-		elseif type(v) == "boolean" then
+		elseif Type == "boolean" then
 			table.insert(content, string.format("b:%s=%s", k, v and 't' or 'f'))
-		elseif type(v) == "string" then
+		elseif Type == "string" then
 			local id = self:SaveString(v)
 			table.insert(content, string.format("s:%s=%s", k, id))
 		end
@@ -55,14 +56,15 @@ function clsStorage:SaveList(value)
 	local content = {}
 	table.insert(content, "list")
 	for i, v in ipairs(value) do
-		if type(v) == "table" then
+		local Type = type(v)
+		if Type == "table" then
 			local id = self:SaveTable(v)
 			table.insert(content, string.format("t:%s", id))
-		elseif type(v) == "number" then
+		elseif Type == "number" then
 			table.insert(content, string.format("n:%s", v))
-		elseif type(v) == "boolean" then
+		elseif Type == "boolean" then
 			table.insert(content, string.format("b:%s", v and 't' or 'f'))
-		elseif type(v) == "string" then
+		elseif Type == "string" then
 			local id = self:SaveString(v)
 			table.insert(content, string.format("s:%s", id))
 		end
