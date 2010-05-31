@@ -20,3 +20,14 @@ function clsTableDB:Out(key)
 	self.store[key] = nil
 end
 
+function clsTableDB:Size()
+	local count = 0
+	for k, v in pairs(self.store) do
+		count = count + #k + #v
+		--print(k)
+		--print('--------')
+		--print(v)
+		--print('--------')
+	end
+	return count
+end

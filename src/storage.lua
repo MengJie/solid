@@ -1,6 +1,9 @@
 require 'common'
 require 'tabledb'
 
+local table = table
+local string = string
+
 clsStorage = {}
 clsStorage.__index = clsStorage
 
@@ -29,12 +32,12 @@ function clsStorage:SaveTable(value)
 	local content = {}
 	table.insert(content, "table")
 	for i, k in ipairs(value.__data) do
-		v = value[k]
+		local v = value[k]
 		if type(v) == "table" then
 			local id = self:SaveTable(v)
 			table.insert(content, string.format("t:%s=%s", k, id))
 		elseif type(v) == "number" then
-			table.insert(content, string.format("n:%s=%s", k, tostring(v)))
+			table.insert(content, string.format("n:%s=%s", k, v))
 		elseif type(v) == "boolean" then
 			table.insert(content, string.format("b:%s=%s", k, v and 't' or 'f'))
 		elseif type(v) == "string" then
@@ -56,7 +59,7 @@ function clsStorage:SaveList(value)
 			local id = self:SaveTable(v)
 			table.insert(content, string.format("t:%s", id))
 		elseif type(v) == "number" then
-			table.insert(content, string.format("n:%s", tostring(v)))
+			table.insert(content, string.format("n:%s", v))
 		elseif type(v) == "boolean" then
 			table.insert(content, string.format("b:%s", v and 't' or 'f'))
 		elseif type(v) == "string" then
