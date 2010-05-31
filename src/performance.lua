@@ -24,15 +24,15 @@ local db = clsTableDB:New()
 local store = clsStorage:New(db)
 local id
 --[[
-	100 : 4.15s
+	100rw : 4.53s luajit : 4.19s
 --]]
-profiler.start('result.out')
-for i = 1, 10 do
+--profiler.start('result.out')
+for i = 1, 100 do
 	id = store:Save(tbl)
 	local aaa = store:Load(id)
 	--print(repr(aaa))
 end
-profiler.stop()
+--profiler.stop()
 
 print(id)
 print(os.clock())
