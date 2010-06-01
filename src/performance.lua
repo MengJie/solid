@@ -28,6 +28,8 @@ local id
 --]]
 --profiler.start('result.out')
 for i = 1, 100 do
+	--local str = save_table(tbl)
+	--local aaa = load_table(str)
 	id = store:Save(tbl)
 	local aaa = store:Load(id)
 	--print(repr(aaa))

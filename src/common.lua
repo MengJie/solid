@@ -7,6 +7,79 @@ local coroutine = coroutine
 local insert = table.insert
 local format = string.format
 
+-- This function is used for serialize a lua table to a string
+-- and vice verse.
+
+local function record_node(ids, nodes, node)
+	if ids[node] ~= nil then
+		return
+	end
+	local id = #nodes + 1
+	nodes[id] = node
+	ids[node] = id
+	if type(node) == "table" then
+		for k, v in pairs(node) do
+			record_node(ids, nodes, k)
+			record_node(ids, nodes, v)
+		end
+	end
+end
+
+local function link_node(ids, nodes, links)
+	for i, v in ipairs(nodes) do
+		if type(v) == 'table' then
+			local tbl_id = ids[v]
+			for kk, vv in pairs(v) do
+				key_id = ids[kk]
+				val_id = ids[vv]
+				links[#links + 1] = {tbl_id, key_id, val_id}
+			end
+		end
+	end
+end
+
+local function serialize(nodes, links)
+	local buf = {}
+	buf[#buf + 1] = "{{"
+	for i, v in ipairs(nodes) do
+		if type(v) == 'table' then
+			buf[#buf + 1] = "{},"
+		elseif type(v) == 'number' then
+			buf[#buf + 1] = v..","
+		elseif type(v) == 'boolean' then
+			buf[#buf + 1] = tostring(v)..","
+		else
+			buf[#buf + 1] = string.format("%q", v) .. ','
+		end
+	end
+	buf[#buf + 1] = "},{"
+	for i, v in ipairs(links) do
+		buf[#buf + 1] = "{" .. v[1] ..","..v[2]..","..v[3].."},"
+	end
+	buf[#buf + 1] = "},}"
+	return table.concat(buf)
+end
+
+function save_table(tbl)
+	local ids = {}
+	local nodes = {}
+	local links = {}
+
+	record_node(ids, nodes, tbl)
+	link_node(ids, nodes, links, tbl)
+	return serialize(nodes, links)
+end
+
+function load_table(str)
+	local result = assert(loadstring('return '..str))()
+	local nodes = result[1]
+	local links = result[2]
+	for i, v in ipairs(links) do
+		nodes[v[1]][nodes[v[2]]] = nodes[v[3]]
+	end
+	return nodes[1]
+end
+
 local function indent(level)
 	return string.rep("    ", level)
 end
